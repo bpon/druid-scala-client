@@ -14,6 +14,7 @@ case class DruidClient(serverUrl: String) {
   }
 
   private def parseJson(resp: Response): JValue = {
+    println(resp.getResponseBody("UTF-8"))
     parse(resp.getResponseBody("UTF-8"))
   }
 
@@ -24,5 +25,20 @@ case class DruidClient(serverUrl: String) {
 
   def apply(ts: TimeSeriesQuery) : Future[TimeSeriesResponse] = execute(ts.toJson, TimeSeriesResponse.parse)
   def apply(ts: GroupByQuery) : Future[GroupByResponse] = execute(ts.toJson, GroupByResponse.parse)
+
+  def queryTimeSeries(query: String) : Future[TimeSeriesResponse] = {
+    Grammar.parser.parseAll(Grammar.parser.timeSeries, query) match {
+      case Grammar.parser.Success(ts, _) => apply(ts.asInstanceOf[TimeSeriesQuery])
+      case failure => throw new IllegalArgumentException(failure.toString)
+    }
+  }
+
+  def queryGroupBy(query: String) : Future[GroupByResponse] = {
+    Grammar.parser.parseAll(Grammar.parser.groupByQuery, query) match {
+      case Grammar.parser.Success(ts, _) => apply(ts.asInstanceOf[GroupByQuery])
+      case failure => throw new IllegalArgumentException(failure.toString)
+    }
+  }
+
 }
 

@@ -5,12 +5,12 @@ import org.joda.time.{DateTime, Interval}
 import scala.util.{Failure, Success}
 
 object WikipediaExample {
-  implicit val executionContext = ExecutionContext.Implicits.global
 
   def main(args: Array[String]) {
+    implicit val executionContext = ExecutionContext.Implicits.global
     val client = DruidClient("http://localhost:8083")
 
-    import DSL._
+    import com.tapad.druid.client.DSL._
     val query = GroupByQuery(
       source = "wikipedia",
       interval = new Interval(new DateTime().minusDays(1), new DateTime()),
