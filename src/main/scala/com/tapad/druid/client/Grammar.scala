@@ -10,9 +10,9 @@ object Grammar extends Parsers {
   /**
    * Convenience for construction filter expressions without using the full parser.
    */
-  def parseFilter(filterString: String) : Either[String, Filter] = {
+  def parseFilter(filterString: String) : Either[String, QueryFilter] = {
     parser.parseAll(parser.filterExpression, filterString) match {
-      case parser.Success(r, _) => Right(r.asInstanceOf[Filter])
+      case parser.Success(r, _) => Right(r.asInstanceOf[QueryFilter])
       case failure => Left(failure.toString)
     }
   }
@@ -32,18 +32,18 @@ object Grammar extends Parsers {
     def literal     = stringLiteral | integer
     def identifier   = """[_\p{L}][_\p{L}\p{Nd}]*""".r
 
-    def selectorFilter : Parser[Filter] = identifier~"="~literal ^^
-      { case dim~op~value => SelectorFilter(dim, value) }
+    def selectorFilter : Parser[QueryFilter] = identifier~"="~literal ^^
+      { case dim~op~value => SelectorQueryFilter(dim, value) }
 
     def parens      =  "\\(".r ~> filterExpression <~ "\\)".r
     def term = parens | selectorFilter
 
-    def filterExpression : Parser[Filter] = term * (
-       "and" ^^^ { (e1: Filter, e2: Filter) => And(Seq(e1, e2))} |
-       "or" ^^^ { (e1: Filter, e2: Filter) => Or(Seq(e1, e2))}
+    def filterExpression : Parser[QueryFilter] = term * (
+       "and" ^^^ { (e1: QueryFilter, e2: QueryFilter) => And(Seq(e1, e2))} |
+       "or" ^^^ { (e1: QueryFilter, e2: QueryFilter) => Or(Seq(e1, e2))}
     )
 
-    def whereClause : Parser[Filter] = "where".r ~ filterExpression ^^ { case _ ~ filter => filter}
+    def whereClause : Parser[QueryFilter] = "where".r ~ filterExpression ^^ { case _ ~ filter => filter}
     
     def columnOrder : Parser[ColumnOrder] = identifier ~ ("asc".r | "desc".r) ^^ 
       { case dim~direction => ColumnOrder(dim, direction)}
@@ -118,7 +118,7 @@ object Grammar extends Parsers {
         granularity = granularity,
         aggregate = aggregates,
         postAggregate = Nil,
-        filter = filter.getOrElse(Filter.All)
+        filter = filter.getOrElse(QueryFilter.All)
       )
     }
 
@@ -135,7 +135,7 @@ object Grammar extends Parsers {
             granularity = granularity,
             aggregate = aggregates,
             postAggregate = Nil,
-            filter = filter.getOrElse(Filter.All)
+            filter = filter.getOrElse(QueryFilter.All)
           )
       }
 

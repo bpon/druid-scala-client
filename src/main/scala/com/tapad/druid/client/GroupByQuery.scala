@@ -10,7 +10,7 @@ case class GroupByQuery(source: String,
                         dimensions: Seq[String],
                         aggregate: Seq[Aggregation],
                         postAggregate: Seq[PostAggregation] = Nil,
-                        filter : Filter = Filter.All,
+                        filter : QueryFilter = QueryFilter.All,
                         orderBy: Seq[ColumnOrder] = Nil,
                         limit: Option[Int] = None) {
   def toJson : JValue = {

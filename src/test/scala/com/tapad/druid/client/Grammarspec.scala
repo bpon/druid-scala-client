@@ -15,26 +15,26 @@ class GrammarSpec extends FlatSpec with Matchers {
   }
 
   "The expression parser" should "parse simple numeric filter expressions" in {
-    expr("age = 9000") should be(SelectorFilter("age", "9000"))
+    expr("age = 9000") should be(SelectorQueryFilter("age", "9000"))
   }
   it should "parse simple string double quote filter expressions" in {
-    expr( """name = "Druid"""") should be(SelectorFilter("name", "Druid"))
+    expr( """name = "Druid"""") should be(SelectorQueryFilter("name", "Druid"))
   }
   it should "parse simple string single quote filter expressions" in {
-    expr( """name = 'Druid'""") should be(SelectorFilter("name", "Druid"))
+    expr( """name = 'Druid'""") should be(SelectorQueryFilter("name", "Druid"))
   }
   it should "parse escaped string filter expressions" in {
-    expr( """name = "Druid has a ""name"" " """) should be(SelectorFilter("name", """Druid has a "name" """))
+    expr( """name = "Druid has a ""name"" " """) should be(SelectorQueryFilter("name", """Druid has a "name" """))
   }
   it should "parse nested expressions" in {
     expr( """name = "Druid" and age = 9000 or age = 21""") should be(
       Or(Seq(
         And(
           Seq(
-            SelectorFilter("name", "Druid"),
-            SelectorFilter("age", "9000")
+            SelectorQueryFilter("name", "Druid"),
+            SelectorQueryFilter("age", "9000")
           )),
-        SelectorFilter("age", "21")
+        SelectorQueryFilter("age", "21")
       ))
     )
   }
@@ -42,13 +42,13 @@ class GrammarSpec extends FlatSpec with Matchers {
     val res = expr( """(name = "Druid") and (age = 9000 or (age = 21 and level = "VIP"))""")
     res should be(
       And(Seq(
-        SelectorFilter("name", "Druid"),
+        SelectorQueryFilter("name", "Druid"),
         Or(
           Seq(
-            SelectorFilter("age", "9000"),
+            SelectorQueryFilter("age", "9000"),
             And(Seq(
-              SelectorFilter("age", "21"),
-              SelectorFilter("level", "VIP")
+              SelectorQueryFilter("age", "21"),
+              SelectorQueryFilter("level", "VIP")
             ))
           )
         )))
@@ -71,7 +71,7 @@ class GrammarSpec extends FlatSpec with Matchers {
           Aggregation("longSum", "pageViews", "pages")
         ),
         postAggregate = Nil,
-        filter = Filter.where("age", "50")
+        filter = QueryFilter.where("age", "50")
       )
     )
     ts("daily (between '2013-01-01 00:00' and '2013-01-31 16:00') select longSum(users), longSum(pageViews) as pages from users where age = 50") should be (
@@ -84,7 +84,7 @@ class GrammarSpec extends FlatSpec with Matchers {
           Aggregation("longSum", "pageViews", "pages")
         ),
         postAggregate = Nil,
-        filter = Filter.where("age", "50")
+        filter = QueryFilter.where("age", "50")
       )
     )
   }

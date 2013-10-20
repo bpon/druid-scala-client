@@ -11,7 +11,7 @@ case class TimeSeriesQuery(source: String,
                       granularity: Granularity,
                       aggregate: Seq[Aggregation],
                       postAggregate: Seq[PostAggregation] = Nil,
-                      filter : Filter = Filter.All) {
+                      filter : QueryFilter = QueryFilter.All) {
   def toJson : JValue = {
     JObject(
       "queryType" -> "timeseries",
